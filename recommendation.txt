@@ -1,0 +1,117 @@
+Wafer-Test-Project Recommendation
+
+[1] Project purpose
+- The code indicates that this project aims to classify wafer map defect patterns from the LSWMD / WM-811K style dataset.
+- In practice, the implemented task is not full wafer classification for all wafers.
+- It is closer to 8-class classification on labeled patterned wafers after excluding the dominant 'none' samples.
+- This is a reasonable baseline research objective for wafer-map pattern recognition.
+
+[2] Model structure
+- The current model is a classical ML pipeline, not a deep CNN.
+- Input: wafer map images stored in a pickle dataset.
+- Feature extraction:
+  1) density features from region partitioning,
+  2) Radon-transform-based statistical features,
+  3) geometric features from the largest connected component.
+- Classifier: One-vs-One Linear SVM.
+- Evaluation: train/test split, confusion matrix, accuracy.
+
+[3] Is the project goal reasonable?
+- Reasonable as a baseline reproduction project: YES.
+- Reasonable as a deployable practical system in the current form: NO.
+
+Why it is reasonable:
+- Wafer map defect classification is a valid and important semiconductor task.
+- Handcrafted features + SVM is a defensible classical baseline.
+- Restricting the first phase to patterned labeled wafers is acceptable for a small academic project.
+
+Why it is not yet practical:
+- The repository is not reproducible enough yet.
+- There is no README that clearly states the task, dataset assumptions, split policy, and results.
+- Data split handling is inconsistent.
+- The code appears to define official split metadata but later performs a fresh random split.
+- Feature dimension / implementation comments are not perfectly aligned.
+- Class imbalance is severe, but the evaluation is still too accuracy-oriented.
+
+[4] Main problems to fix
+1. Clarify the exact task definition.
+- Decide whether the task is:
+  A) 8-class patterned wafer classification,
+  B) pattern vs non-pattern detection,
+  C) full practical pipeline with rejection / uncertainty handling.
+- Write this clearly in README.
+
+2. Fix the train/test split policy.
+- Do not mix official split metadata with a new uncontrolled random split.
+- If the dataset provides split labels, use them consistently.
+- If not, use stratified split at minimum.
+- Prefer group-aware split by lot if leakage is possible.
+
+3. Make feature dimensions and code behavior consistent.
+- Verify the exact output dimension of every feature block.
+- Align comments, variable names, and final concatenated dimension.
+- Remove side-effect-dependent preprocessing.
+- Make preprocessing explicit and reproducible.
+
+4. Improve evaluation.
+- Add macro-F1.
+- Add balanced accuracy.
+- Add per-class recall.
+- Keep confusion matrix.
+- Report class counts for train/test.
+- Accuracy alone is insufficient for this imbalance level.
+
+5. Clean repository structure.
+- Add README.md.
+- Add requirements.txt or environment.yml.
+- Add a single main training script.
+- Separate preprocessing, feature extraction, training, and evaluation into modules.
+- Add saved example results / figures.
+
+[5] Recommended revised objective
+Recommended near-term objective:
+- Build a fully reproducible baseline for 8-class patterned wafer classification using handcrafted features + Linear SVM.
+
+Recommended mid-term objective:
+- Extend the pipeline into two stages:
+  Stage 1: detect whether a wafer contains a meaningful defect pattern.
+  Stage 2: classify the defect type only for positive wafers.
+
+Recommended practical objective:
+- Add confidence-based rejection.
+- Low-confidence samples should be deferred to human engineers instead of being force-classified.
+
+[6] Concrete modification roadmap
+Phase 1: Reproducibility recovery
+- Add README with task definition, dataset description, label mapping, and exact class scope.
+- Standardize column names and label parsing.
+- Refactor preprocessing into deterministic functions.
+- Freeze one official split policy.
+- Save metrics and confusion matrix to disk.
+
+Phase 2: Baseline stabilization
+- Re-run the current handcrafted-feature + Linear SVM baseline.
+- Tune C and class weighting.
+- Compare One-vs-One vs One-vs-Rest.
+- Evaluate with macro-F1 and balanced accuracy.
+
+Phase 3: Practical extension
+- Add binary gate: patterned vs none / uncertain.
+- Add confidence thresholding.
+- Optionally compare with a lightweight CNN baseline.
+
+[7] Final recommendation
+This project should not be abandoned.
+It already has a meaningful classical wafer-map classification idea.
+However, it should be reframed as a baseline research project first, not as a finished practical solution.
+
+Best direction:
+- First, make the current SVM pipeline reproducible and clearly defined.
+- Second, evaluate it with imbalance-aware metrics.
+- Third, expand to a two-stage practical pipeline with confidence-based rejection.
+
+In short:
+- The idea is valid.
+- The current implementation is incomplete.
+- The best next step is not a new model first.
+- The best next step is task clarification, reproducibility cleanup, and evaluation redesign.
